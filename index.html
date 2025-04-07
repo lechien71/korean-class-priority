@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>朝鮮語４Ｃクラス受講優先順位判定アプリ</title>
+  <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const KoreanClassPriorityApp = () => {
+      // ステップを管理する状態
+      const [step, setStep] = useState(1);
+      // 回答を保存する状態
+      const [answers, setAnswers] = useState({
+        department: '',
+        grade: '',
+        pattern: '',
+        method: '',
+        schedule: ''
+      });
+      // 結果を保存する状態
+      const [result, setResult] = useState('');
+
+      // 回答を更新する関数
+      const handleAnswer = (question, answer) => {
+        setAnswers(prev => ({ ...prev, [question]: answer }));
+        
+        // 次のステップに進む
+        // パターンBを選択した場合のみ、method（リレー/非リレー）の質問を表示
+        if (question === 'pattern' && answer !== 'B') {
+          setStep(5); // methodをスキップして次の質問へ
+        } else {
+          setStep(prev => prev + 1);
+        }
+      };
+
+      // 優先順位と結果メッセージを計算する関数
+      const calculatePriority = () => {
+        const { department, grade, pattern, method, schedule } = answers;
+        let priority = '';
+        let message = '';
+
+        // 優先学部（法学部（国際政治学科除く）、文学部、経営学部）かどうか
+        const isPriorityDepartment = ['法学部（国際政治学科除く）', '文学部', '経営学部'].includes(department);
+
+        if (isPriorityDepartment) {
+          if (pattern === 'B' && method === '非リレー式' && schedule === 'yes') {
+            priority = '最優先';
+            message = 'あなたは最優先的に朝鮮語4Cクラスを受講できます。\n\n木曜3限に他の授業があり、朝鮮語4Bを履修できないパターンBの学生であるためです。';
+          } else if (pattern === 'B' && method === '非リレー式') {
+            priority = '高優先';
+            message = 'あなたは高優先的に朝鮮語4Cクラスを受講できます。\n\nパターンBで非リレー方式の学生であるためです。';
+          } else if (pattern === '過年度') {
+            priority = '中優先';
+            message = 'あなたは中程度の優先順位で朝鮮語4Cクラスを受講できます。\n\n過年度からの継続履修であるため、優先学部の学生が定員に満たない場合に受講できる可能性があります。';
+          } else {
+            priority = '低優先';
+            message = 'あなたは低い優先順位で朝鮮語4Cクラスを受講できます。\n\n優先度の高い学生が定員に満たない場合に受講できる可能性があります。';
+          }
+        } else {
+          priority = '最低優先';
+          message = 'あなたは最も低い優先順位で朝鮮語4Cクラスを受講できます。\n\n法学部（国際政治学科除く）、文学部、経営学部以外の学生は、定員に相当な余裕がある場合のみ受講できます。';
+        }
+
+        return {
+          priority,
+          message: message + '\n\n不明な点がある場合は、乾先生\nhiroshi.inui.46@hosei.ac.jp\nまでご連絡ください。'
+        };
+      };
+
+      // 結果を表示する関数
+      const showResult = () => {
+        const result = calculatePriority();
+        setResult(result.message);
+        setStep(6);
+      };
+
+      // 最初からやり直す関数
+      const restart = () => {
+        setAnswers({
+          department: '',
+          grade: '',
+          pattern: '',
+          method: '',
+          schedule: ''
+        });
+        setResult('');
+        setStep(1);
+      };
+
+      // 各質問のスタイル
+      const containerStyle = {
+        maxWidth: "500px",
+        margin: "0 auto",
+        padding: "20px",
+        backgroundColor: "white",
+        borderRadius: "10px",
+        boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
+      };
+      
+      const buttonStyle = {
+        width: "100%",
+        padding: "10px",
+        margin: "5px 0",
+        backgroundColor: "#000000", // 黒色の背景
+        color: "white",            // 白色の文字
+        border: "none",
+        borderRadius: "5px",
+        cursor: "pointer"
+      };
+      
+      const resultContainerStyle = {
+        backgroundColor: "#f7fafc",
+        padding: "15px",
+        borderRadius: "5px",
+        marginBottom: "20px"
+      };
+
+      return (
+        <div style={containerStyle}>
+          <h1 style={{textAlign: "center", marginBottom: "20px"}}>朝鮮語４Ｃクラス受講優先順位判定</h1>
+          
+          {step === 1 && (
+            <div>
+              <h2 style={{fontSize: "18px", marginBottom: "10px"}}>質問1：あなたの所属学部を選択してください</h2>
+              <div>
+                {['法学部（国際政治学科除く）', '文学部', '経営学部', 'キャリアデザイン学部', '人間環境学部', 'その他'].map(dept => (
+                  <button
+                    key={dept}
+                    onClick={() => handleAnswer('department', dept)}
+                    style={buttonStyle}
+                  >
+                    {dept}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div>
+              <h2 style={{fontSize: "18px", marginBottom: "10px"}}>質問2：あなたの学年を選択してください</h2>
+              <div>
+                {['1年生', '2年生', '3年生', '4年生'].map(grade => (
+                  <button
+                    key={grade}
+                    onClick={() => handleAnswer('grade', grade)}
+                    style={buttonStyle}
+                  >
+                    {grade}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div>
+              <h2 style={{fontSize: "18px", marginBottom: "10px"}}>質問3：2年生の朝鮮語履修パターンを選択してください</h2>
+              <div>
+                <button
+                  onClick={() => handleAnswer('pattern', 'A')}
+                  style={buttonStyle}
+                >
+                  パターンA（週1コマ履修・朝鮮語3Bのみ）
+                </button>
+                <button
+                  onClick={() => handleAnswer('pattern', 'B')}
+                  style={buttonStyle}
+                >
+                  パターンB（週2コマ履修・朝鮮語3と4の両方）
+                </button>
+                <button
+                  onClick={() => handleAnswer('pattern', '過年度')}
+                  style={buttonStyle}
+                >
+                  過年度からの継続履修（朝鮮語4Cの単位未修得）
+                </button>
+                <button
+                  onClick={() => handleAnswer('pattern', '該当しない')}
+                  style={buttonStyle}
+                >
+                  該当しない
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 4 && answers.pattern === 'B' && (
+            <div>
+              <h2 style={{fontSize: "18px", marginBottom: "10px"}}>質問4：どちらの履修方法を選びますか？</h2>
+              <div>
+                <button
+                  onClick={() => handleAnswer('method', 'リレー式')}
+                  style={buttonStyle}
+                >
+                  リレー方式（朝鮮語3A+朝鮮語4A）
+                </button>
+                <button
+                  onClick={() => handleAnswer('method', '非リレー式')}
+                  style={buttonStyle}
+                >
+                  非リレー方式（朝鮮語3B+朝鮮語4B/C）
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 5 && (
+            <div>
+              <h2 style={{fontSize: "18px", marginBottom: "10px"}}>質問5：木曜3限（13:10〜14:50）に他の授業がありますか？</h2>
+              <div>
+                <button
+                  onClick={() => {
+                    handleAnswer('schedule', 'yes');
+                    showResult();
+                  }}
+                  style={buttonStyle}
+                >
+                  はい（他の授業があるため朝鮮語4Bを履修できない）
+                </button>
+                <button
+                  onClick={() => {
+                    handleAnswer('schedule', 'no');
+                    showResult();
+                  }}
+                  style={buttonStyle}
+                >
+                  いいえ（朝鮮語4Bも履修可能）
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 6 && (
+            <div>
+              <h2 style={{fontSize: "18px", marginBottom: "15px"}}>あなたの受講優先順位</h2>
+              <div style={resultContainerStyle}>
+                {result.split('\n').map((line, index) => {
+                  // 「優先的に」を含む行は強調
+                  if (line.includes('優先的に')) {
+                    const parts = line.split('優先的に');
+                    return (
+                      <p key={index}>
+                        {parts[0]}<strong style={{fontWeight: "bold", color: "red"}}>優先的に</strong>{parts[1]}
+                      </p>
+                    );
+                  }
+                  // メールアドレスの行はリンク
+                  else if (line.includes('@')) {
+                    return (
+                      <p key={index}>
+                        <a 
+                          href={`mailto:${line.trim()}`} 
+                          style={{color: "blue", textDecoration: "underline"}}
+                        >
+                          {line}
+                        </a>
+                      </p>
+                    );
+                  }
+                  // 空行の場合
+                  else if (line.trim() === '') {
+                    return <br key={index} />;
+                  }
+                  // その他の行
+                  else {
+                    return <p key={index}>{line}</p>;
+                  }
+                })}
+              </div>
+              <button
+                onClick={restart}
+                style={{...buttonStyle, marginTop: "15px"}}
+              >
+                最初からやり直す
+              </button>
+            </div>
+          )}
+
+          <div style={{fontSize: "12px", color: "#666", marginTop: "15px", textAlign: "center"}}>
+            <p>法政大学 朝鮮語４Ｃクラス（木曜2限）</p>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<KoreanClassPriorityApp />, document.getElementById('root'));
+  </script>
+</body>
+</html>

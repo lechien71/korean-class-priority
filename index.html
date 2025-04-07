@@ -15,9 +15,7 @@
     const { useState } = React;
 
     const KoreanClassPriorityApp = () => {
-      // ステップを管理する状態
       const [step, setStep] = useState(1);
-      // 回答を保存する状態
       const [answers, setAnswers] = useState({
         department: '',
         grade: '',
@@ -25,29 +23,21 @@
         method: '',
         schedule: ''
       });
-      // 結果を保存する状態
       const [result, setResult] = useState('');
 
-      // 回答を更新する関数
       const handleAnswer = (question, answer) => {
         setAnswers(prev => ({ ...prev, [question]: answer }));
-        
-        // 次のステップに進む
-        // パターンBを選択した場合のみ、method（リレー/非リレー）の質問を表示
         if (question === 'pattern' && answer !== 'B') {
-          setStep(5); // methodをスキップして次の質問へ
+          setStep(5);
         } else {
           setStep(prev => prev + 1);
         }
       };
 
-      // 優先順位と結果メッセージを計算する関数
       const calculatePriority = () => {
         const { department, grade, pattern, method, schedule } = answers;
         let priority = '';
         let message = '';
-
-        // 優先学部（法学部（国際政治学科除く）、文学部、経営学部）かどうか
         const isPriorityDepartment = ['法学部（国際政治学科除く）', '文学部', '経営学部'].includes(department);
 
         if (isPriorityDepartment) {
@@ -75,14 +65,12 @@
         };
       };
 
-      // 結果を表示する関数
       const showResult = () => {
         const result = calculatePriority();
         setResult(result.message);
         setStep(6);
       };
 
-      // 最初からやり直す関数
       const restart = () => {
         setAnswers({
           department: '',
@@ -95,7 +83,6 @@
         setStep(1);
       };
 
-      // 各質問のスタイル
       const containerStyle = {
         maxWidth: "500px",
         margin: "0 auto",
@@ -104,18 +91,21 @@
         borderRadius: "10px",
         boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
       };
-      
+
       const buttonStyle = {
         width: "100%",
         padding: "10px",
         margin: "5px 0",
-        backgroundColor: "#000000", // 黒色の背景
-        color: "white",            // 白色の文字
+        backgroundColor: "#000000",
+        color: "white",
         border: "none",
         borderRadius: "5px",
-        cursor: "pointer"
+        cursor: "pointer",
+        wordBreak: "keep-all",
+        whiteSpace: "normal",
+        lineHeight: "1.5"
       };
-      
+
       const resultContainerStyle = {
         backgroundColor: "#f7fafc",
         padding: "15px",
@@ -126,19 +116,13 @@
       return (
         <div style={containerStyle}>
           <h1 style={{textAlign: "center", marginBottom: "20px"}}>朝鮮語４Ｃクラス受講優先順位判定</h1>
-          
+
           {step === 1 && (
             <div>
               <h2 style={{fontSize: "18px", marginBottom: "10px"}}>質問1：あなたの所属学部を選択してください</h2>
               <div>
                 {['法学部（国際政治学科除く）', '文学部', '経営学部', 'キャリアデザイン学部', '人間環境学部', 'その他'].map(dept => (
-                  <button
-                    key={dept}
-                    onClick={() => handleAnswer('department', dept)}
-                    style={buttonStyle}
-                  >
-                    {dept}
-                  </button>
+                  <button key={dept} onClick={() => handleAnswer('department', dept)} style={buttonStyle}>{dept}</button>
                 ))}
               </div>
             </div>
@@ -149,13 +133,7 @@
               <h2 style={{fontSize: "18px", marginBottom: "10px"}}>質問2：あなたの学年を選択してください</h2>
               <div>
                 {['1年生', '2年生', '3年生', '4年生'].map(grade => (
-                  <button
-                    key={grade}
-                    onClick={() => handleAnswer('grade', grade)}
-                    style={buttonStyle}
-                  >
-                    {grade}
-                  </button>
+                  <button key={grade} onClick={() => handleAnswer('grade', grade)} style={buttonStyle}>{grade}</button>
                 ))}
               </div>
             </div>
@@ -165,28 +143,16 @@
             <div>
               <h2 style={{fontSize: "18px", marginBottom: "10px"}}>質問3：2年生の朝鮮語履修パターンを選択してください</h2>
               <div>
-                <button
-                  onClick={() => handleAnswer('pattern', 'A')}
-                  style={buttonStyle}
-                >
-                  パターンA（週1コマ履修・朝鮮語3Bのみ）
+                <button onClick={() => handleAnswer('pattern', 'A')} style={buttonStyle}>
+                  パターンA（週1コマ履修<wbr />・朝鮮語3Bのみ）
                 </button>
-                <button
-                  onClick={() => handleAnswer('pattern', 'B')}
-                  style={buttonStyle}
-                >
-                  パターンB（週2コマ履修・朝鮮語3と4の両方）
+                <button onClick={() => handleAnswer('pattern', 'B')} style={buttonStyle}>
+                  パターンB（週2コマ履修<wbr />・朝鮮語3と4の両方）
                 </button>
-                <button
-                  onClick={() => handleAnswer('pattern', '過年度')}
-                  style={buttonStyle}
-                >
-                  過年度からの継続履修（朝鮮語4Cの単位未修得）
+                <button onClick={() => handleAnswer('pattern', '過年度')} style={buttonStyle}>
+                  過年度からの継続履修<wbr />（朝鮮語4Cの単位未修得）
                 </button>
-                <button
-                  onClick={() => handleAnswer('pattern', '該当しない')}
-                  style={buttonStyle}
-                >
+                <button onClick={() => handleAnswer('pattern', '該当しない')} style={buttonStyle}>
                   該当しない
                 </button>
               </div>
@@ -197,17 +163,11 @@
             <div>
               <h2 style={{fontSize: "18px", marginBottom: "10px"}}>質問4：どちらの履修方法を選びますか？</h2>
               <div>
-                <button
-                  onClick={() => handleAnswer('method', 'リレー式')}
-                  style={buttonStyle}
-                >
-                  リレー方式（朝鮮語3A+朝鮮語4A）
+                <button onClick={() => handleAnswer('method', 'リレー式')} style={buttonStyle}>
+                  リレー方式<wbr />（朝鮮語3A+朝鮮語4A）
                 </button>
-                <button
-                  onClick={() => handleAnswer('method', '非リレー式')}
-                  style={buttonStyle}
-                >
-                  非リレー方式（朝鮮語3B+朝鮮語4B/C）
+                <button onClick={() => handleAnswer('method', '非リレー式')} style={buttonStyle}>
+                  非リレー方式<wbr />（朝鮮語3B+朝鮮語4B/C）
                 </button>
               </div>
             </div>
@@ -217,22 +177,10 @@
             <div>
               <h2 style={{fontSize: "18px", marginBottom: "10px"}}>質問5：木曜3限（13:10〜14:50）に他の授業がありますか？</h2>
               <div>
-                <button
-                  onClick={() => {
-                    handleAnswer('schedule', 'yes');
-                    showResult();
-                  }}
-                  style={buttonStyle}
-                >
-                  はい（他の授業があるため朝鮮語4Bを履修できない）
+                <button onClick={() => { handleAnswer('schedule', 'yes'); showResult(); }} style={buttonStyle}>
+                  はい（他の授業があるため<wbr />朝鮮語4Bを履修できない）
                 </button>
-                <button
-                  onClick={() => {
-                    handleAnswer('schedule', 'no');
-                    showResult();
-                  }}
-                  style={buttonStyle}
-                >
+                <button onClick={() => { handleAnswer('schedule', 'no'); showResult(); }} style={buttonStyle}>
                   いいえ（朝鮮語4Bも履修可能）
                 </button>
               </div>
@@ -244,44 +192,19 @@
               <h2 style={{fontSize: "18px", marginBottom: "15px"}}>あなたの受講優先順位</h2>
               <div style={resultContainerStyle}>
                 {result.split('\n').map((line, index) => {
-                  // 「優先的に」を含む行は強調
                   if (line.includes('優先的に')) {
                     const parts = line.split('優先的に');
-                    return (
-                      <p key={index}>
-                        {parts[0]}<strong style={{fontWeight: "bold", color: "red"}}>優先的に</strong>{parts[1]}
-                      </p>
-                    );
-                  }
-                  // メールアドレスの行はリンク
-                  else if (line.includes('@')) {
-                    return (
-                      <p key={index}>
-                        <a 
-                          href={`mailto:${line.trim()}`} 
-                          style={{color: "blue", textDecoration: "underline"}}
-                        >
-                          {line}
-                        </a>
-                      </p>
-                    );
-                  }
-                  // 空行の場合
-                  else if (line.trim() === '') {
+                    return <p key={index}>{parts[0]}<strong style={{color: "red"}}>優先的に</strong>{parts[1]}</p>;
+                  } else if (line.includes('@')) {
+                    return <p key={index}><a href={`mailto:${line.trim()}`} style={{color: "blue"}}>{line}</a></p>;
+                  } else if (line.trim() === '') {
                     return <br key={index} />;
-                  }
-                  // その他の行
-                  else {
+                  } else {
                     return <p key={index}>{line}</p>;
                   }
                 })}
               </div>
-              <button
-                onClick={restart}
-                style={{...buttonStyle, marginTop: "15px"}}
-              >
-                最初からやり直す
-              </button>
+              <button onClick={restart} style={{...buttonStyle, marginTop: "15px"}}>最初からやり直す</button>
             </div>
           )}
 
@@ -296,3 +219,4 @@
   </script>
 </body>
 </html>
+
